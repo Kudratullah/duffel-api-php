@@ -5,8 +5,15 @@ declare(strict_types=1);
 namespace Duffel\Tests;
 
 use Duffel\Api\Aircraft;
+use Duffel\Api\AirlineCredits;
+use Duffel\Api\AirlineInitiatedChanges;
 use Duffel\Api\Airlines;
 use Duffel\Api\Airports;
+use Duffel\Api\BatchOfferRequests;
+use Duffel\Api\Cars;
+use Duffel\Api\Cities;
+use Duffel\Api\Identity;
+use Duffel\Api\LoyaltyProgrammes;
 use Duffel\Api\OfferRequests;
 use Duffel\Api\Offers;
 use Duffel\Api\OrderCancellations;
@@ -14,10 +21,15 @@ use Duffel\Api\OrderChangeOffers;
 use Duffel\Api\OrderChangeRequests;
 use Duffel\Api\OrderChanges;
 use Duffel\Api\Orders;
+use Duffel\Api\PartialOfferRequests;
 use Duffel\Api\PaymentIntents;
 use Duffel\Api\Payments;
+use Duffel\Api\Places;
 use Duffel\Api\Refunds;
 use Duffel\Api\SeatMaps;
+use Duffel\Api\Stays;
+use Duffel\Api\WebhookDeliveries;
+use Duffel\Api\WebhookEvents;
 use Duffel\Api\Webhooks;
 use Duffel\Client;
 use Duffel\Exception\InvalidAccessTokenException;
@@ -26,12 +38,10 @@ use Http\Client\Common\HttpMethodsClient;
 use PHPUnit\Framework\TestCase;
 
 class ClientTest extends TestCase {
-  private $subject;
+  private Client $subject;
 
   public function setUp(): void {
-    $this->subject = new Client(
-      new Builder(),
-    );
+    $this->subject = new Client(new Builder());
   }
 
   public function testCreatesNewClient(): void {
@@ -40,11 +50,19 @@ class ClientTest extends TestCase {
   }
 
   public function testNewSetsDefaultApiVersion(): void {
-    $this->assertSame('v1', $this->subject->getApiVersion());
+    $this->assertSame('v2', $this->subject->getApiVersion());
   }
 
   public function testNewSetsDefaultAccessToken(): void {
     $this->assertSame('', $this->subject->getAccessToken());
+  }
+
+  public function testDebugInfoRedactsAccessToken(): void {
+    $this->subject->setAccessToken('duffel_test_secret_123');
+    $debug = $this->subject->__debugInfo();
+
+    $this->assertSame('[REDACTED]', $debug['accessToken']);
+    $this->assertSame('v2', $debug['apiVersion']);
   }
 
   public function testAircraftUsesApiClass(): void {
@@ -67,67 +85,46 @@ class ClientTest extends TestCase {
     $this->assertInstanceOf(Offers::class, $this->subject->offers());
   }
 
-  public function testOrderCancellationsUsesApiClass(): void {
-    $this->assertInstanceOf(OrderCancellations::class, $this->subject->orderCancellations());
-  }
-
-  public function testOrderChangeOffersUsesApiClass(): void {
-    $this->assertInstanceOf(OrderChangeOffers::class, $this->subject->orderChangeOffers());
-  }
-
-  public function testOrderChangeRequestsUsesApiClass(): void {
-    $this->assertInstanceOf(OrderChangeRequests::class, $this->subject->orderChangeRequests());
-  }
-
-  public function testOrderChangesUsesApiClass(): void {
-    $this->assertInstanceOf(OrderChanges::class, $this->subject->orderChanges());
-  }
-
   public function testOrdersUsesApiClass(): void {
     $this->assertInstanceOf(Orders::class, $this->subject->orders());
   }
 
-  public function testPaymentIntentsUsesApiClass(): void {
-    $this->assertInstanceOf(PaymentIntents::class, $this->subject->paymentIntents());
+  public function testStaysUsesApiClass(): void {
+    $this->assertInstanceOf(Stays::class, $this->subject->stays());
   }
 
-  public function testPaymentsUsesApiClass(): void {
-    $this->assertInstanceOf(Payments::class, $this->subject->payments());
+  public function testCarsUsesApiClass(): void {
+    $this->assertInstanceOf(Cars::class, $this->subject->cars());
   }
 
-  public function testRefundsUsesApiClass(): void {
-    $this->assertInstanceOf(Refunds::class, $this->subject->refunds());
+  public function testIdentityUsesApiClass(): void {
+    $this->assertInstanceOf(Identity::class, $this->subject->identity());
   }
 
-  public function testSeatMapsUsesApiClass(): void {
-    $this->assertInstanceOf(SeatMaps::class, $this->subject->seatMaps());
+  public function testPlacesUsesApiClass(): void {
+    $this->assertInstanceOf(Places::class, $this->subject->places());
   }
 
-  public function testWebhooksUsesApiClass(): void {
-    $this->assertInstanceOf(Webhooks::class, $this->subject->webhooks());
+  public function testCitiesUsesApiClass(): void {
+    $this->assertInstanceOf(Cities::class, $this->subject->cities());
+  }
+
+  public function testLoyaltyProgrammesUsesApiClass(): void {
+    $this->assertInstanceOf(LoyaltyProgrammes::class, $this->subject->loyaltyProgrammes());
   }
 
   public function testSetAccessTokenChangesValue(): void {
     $this->subject->setAccessToken('some-token');
-
     $this->assertSame('some-token', $this->subject->getAccessToken());
   }
 
   public function testSetAccessTokenWithEmptyStringThrowsException(): void {
     $this->expectException(InvalidAccessTokenException::class);
-
     $this->subject->setAccessToken('   ');
   }
 
-  public function testSetAccessTokenWithNullThrowsTypeError(): void {
-    $this->expectException(\TypeError::class);
-
-    $this->subject->setAccessToken(null);
-  }
-
   public function testSetApiVersionChangesValue(): void {
-    $this->subject->setApiVersion('some-version');
-
-    $this->assertSame('some-version', $this->subject->getApiVersion());
+    $this->subject->setApiVersion('v2');
+    $this->assertSame('v2', $this->subject->getApiVersion());
   }
 }

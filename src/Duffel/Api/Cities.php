@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Duffel\Api;
 
-class Airports extends AbstractApi {
+class Cities extends AbstractApi {
   /**
    * @param array<string, mixed> $parameters
    * @return mixed
    */
   public function all(array $parameters = []): mixed {
-    return $this->get('/air/airports', $parameters);
+    return $this->get('/air/cities', $parameters);
   }
 
   /**
@@ -18,6 +18,6 @@ class Airports extends AbstractApi {
    * @return mixed
    */
   public function show(string $id): mixed {
-    return $this->get('/air/airports/' . self::encodePath($id));
+    return $this->get('/air/cities/' . self::encodePath($id));
   }
 }

@@ -6,20 +6,18 @@ namespace Duffel\Api;
 
 class Airlines extends AbstractApi {
   /**
-   * @param array $parameters
-   *
+   * @param array<string, mixed> $parameters
    * @return mixed
    */
-  public function all(array $parameters = []) {
-    return $this->get('/air/airlines');
+  public function all(array $parameters = []): mixed {
+    return $this->get('/air/airlines', $parameters);
   }
 
   /**
    * @param string $id
-   *
    * @return mixed
    */
-  public function show(string $id) {
-    return $this->get('/air/airlines/'.self::encodePath($id));
+  public function show(string $id): mixed {
+    return $this->get('/air/airlines/' . self::encodePath($id));
   }
 }

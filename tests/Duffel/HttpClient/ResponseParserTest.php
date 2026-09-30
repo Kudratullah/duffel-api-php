@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duffel\HttpClient;
+namespace Duffel\Tests\HttpClient;
 
 use Duffel\Exception\RuntimeException;
 use Duffel\HttpClient\ResponseParser;
+use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
@@ -26,7 +27,7 @@ class ResponseParserTest extends TestCase {
 
   public function testGetContentAsJsonWithoutDataKey(): void {
     $this->stub->method('getBody')
-               ->willReturn('{"some": {"keys": ["with", "values"]} }');
+               ->willReturn(Utils::streamFor('{"some": {"keys": ["with", "values"]} }'));
     $this->stub->method('getHeaderLine')
                ->with('Content-Type')
                ->willReturn('application/json');
@@ -36,7 +37,7 @@ class ResponseParserTest extends TestCase {
 
   public function testGetContentAsJsonWithDataKey(): void {
     $this->stub->method('getBody')
-               ->willReturn('{"data": {"some": {"keys": ["with", "values"]} } }');
+               ->willReturn(Utils::streamFor('{"data": {"some": {"keys": ["with", "values"]} } }'));
     $this->stub->method('getHeaderLine')
                ->with('Content-Type')
                ->willReturn('application/json');
@@ -46,7 +47,7 @@ class ResponseParserTest extends TestCase {
 
   public function testGetContentWithNilBodyAndContentTypeAsJson(): void {
     $this->stub->method('getBody')
-               ->willReturn('');
+               ->willReturn(Utils::streamFor(''));
     $this->stub->method('getHeaderLine')
                ->with('Content-Type')
                ->willReturn('application/json');
@@ -56,7 +57,7 @@ class ResponseParserTest extends TestCase {
 
   public function testGetContentWithNullBodyAndContentTypeAsJson(): void {
     $this->stub->method('getBody')
-               ->willReturn('null');
+               ->willReturn(Utils::streamFor('null'));
     $this->stub->method('getHeaderLine')
                ->with('Content-Type')
                ->willReturn('application/json');
@@ -66,7 +67,7 @@ class ResponseParserTest extends TestCase {
 
   public function testGetContentWithTrueBodyAndContentTypeAsJson(): void {
     $this->stub->method('getBody')
-               ->willReturn('true');
+               ->willReturn(Utils::streamFor('true'));
     $this->stub->method('getHeaderLine')
                ->with('Content-Type')
                ->willReturn('application/json');
@@ -76,7 +77,7 @@ class ResponseParserTest extends TestCase {
 
   public function testGetContentWithFalseBodyAndContentTypeAsJson(): void {
     $this->stub->method('getBody')
-               ->willReturn('false');
+               ->willReturn(Utils::streamFor('false'));
     $this->stub->method('getHeaderLine')
                ->with('Content-Type')
                ->willReturn('application/json');
@@ -86,21 +87,21 @@ class ResponseParserTest extends TestCase {
 
   public function testGetErrorMessageTransformsList(): void {
     $this->stub->method('getBody')
-               ->willReturn('{
+               ->willReturn(Utils::streamFor('{
                "errors": [
-  {
-    "code": "missing_authorization_header",
-      "documentation_url": "https://duffel.com/docs/api/overview/errors",
-      "message": "The \'Authorization\' header needs to be set and contain a valid API token.",
-      "title": "Missing authorization header",
-      "type": "authentication_error"
-  }
-  ],
-    "meta": {
-    "request_id": "FZW0H3HdJwKk5HMAAKxB",
-      "status": 401
-  }
-  }');
+                 {
+                   "code": "missing_authorization_header",
+                   "documentation_url": "https://duffel.com/docs/api/overview/errors",
+                   "message": "The \'Authorization\' header needs to be set and contain a valid API token.",
+                   "title": "Missing authorization header",
+                   "type": "authentication_error"
+                 }
+               ],
+               "meta": {
+                 "request_id": "FZW0H3HdJwKk5HMAAKxB",
+                 "status": 401
+               }
+             }'));
     $this->stub->method('getHeaderLine')
                ->with('Content-Type')
                ->willReturn('application/json');
@@ -109,28 +110,24 @@ class ResponseParserTest extends TestCase {
                ->willReturn(['some-request-id']);
 
     $this->assertSame(
-      '[some-request-id]: code: missing_authorization_header, documentation_url: https://duffel.com/docs/api/overview/errors, message: The \'Authorization\' header needs to be set and contain a valid API token., title: Missing authorization header, type: authentication_error',
+      '[some-request-id]: Missing authorization header (missing_authorization_header): The \'Authorization\' header needs to be set and contain a valid API token.',
       ResponseParser::getErrorMessage($this->stub)
     );
   }
 
   public function testGetErrorMessageWhenRequestIdIsMissingReturnsUnwrappedMessage(): void {
     $this->stub->method('getBody')
-               ->willReturn('{
+               ->willReturn(Utils::streamFor('{
                "errors": [
-  {
-    "code": "missing_authorization_header",
-      "documentation_url": "https://duffel.com/docs/api/overview/errors",
-      "message": "The \'Authorization\' header needs to be set and contain a valid API token.",
-      "title": "Missing authorization header",
-      "type": "authentication_error"
-  }
-  ],
-    "meta": {
-    "request_id": "FZW0H3HdJwKk5HMAAKxB",
-      "status": 401
-  }
-  }');
+                 {
+                   "code": "missing_authorization_header",
+                   "documentation_url": "https://duffel.com/docs/api/overview/errors",
+                   "message": "The \'Authorization\' header needs to be set and contain a valid API token.",
+                   "title": "Missing authorization header",
+                   "type": "authentication_error"
+                 }
+               ]
+             }'));
     $this->stub->method('getHeaderLine')
                ->with('Content-Type')
                ->willReturn('application/json');
@@ -139,14 +136,14 @@ class ResponseParserTest extends TestCase {
                ->willReturn([]);
 
     $this->assertSame(
-      'code: missing_authorization_header, documentation_url: https://duffel.com/docs/api/overview/errors, message: The \'Authorization\' header needs to be set and contain a valid API token., title: Missing authorization header, type: authentication_error',
+      'Missing authorization header (missing_authorization_header): The \'Authorization\' header needs to be set and contain a valid API token.',
       ResponseParser::getErrorMessage($this->stub)
     );
   }
 
   public function testGetErrorMessageWhenJsonDecodeFailsReturnsNull(): void {
     $this->stub->method('getBody')
-               ->willThrowException(new RuntimeException());
+               ->willThrowException(new RuntimeException('Invalid body stream'));
     $this->stub->method('getHeaderLine')
                ->with('Content-Type')
                ->willReturn('application/json');
@@ -156,7 +153,7 @@ class ResponseParserTest extends TestCase {
 
   public function testGetErrorMessageWhenJsonIsStringReturnsNull(): void {
     $this->stub->method('getBody')
-               ->willReturn('"some error string in JSON format"');
+               ->willReturn(Utils::streamFor('"some error string in JSON format"'));
     $this->stub->method('getHeaderLine')
                ->with('Content-Type')
                ->willReturn('application/json');
@@ -166,7 +163,7 @@ class ResponseParserTest extends TestCase {
 
   public function testGetErrorMessageWhenTextIsStringReturnsNull(): void {
     $this->stub->method('getBody')
-               ->willReturn('some error string in text format');
+               ->willReturn(Utils::streamFor('some error string in text format'));
     $this->stub->method('getHeaderLine')
                ->with('Content-Type')
                ->willReturn('text/plain');
@@ -176,7 +173,7 @@ class ResponseParserTest extends TestCase {
 
   public function testGetErrorMessageWhenJsonIsObjectWithoutErrorsKeyReturnsNull(): void {
     $this->stub->method('getBody')
-               ->willReturn('{"some": ["error", "string in JSON", "format"]}');
+               ->willReturn(Utils::streamFor('{"some": ["error", "string in JSON", "format"]}'));
     $this->stub->method('getHeaderLine')
                ->with('Content-Type')
                ->willReturn('application/json');

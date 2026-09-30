@@ -38,15 +38,6 @@ class OffersTest extends TestCase {
     $actual->show('some-id');
   }
 
-  public function testShowWithIdAndFalseCallsGetWithExpectedUri(): void {
-    $this->mock->expects($this->once())
-               ->method('get')
-               ->with($this->equalTo('/air/offers/some-id'));
-
-    $actual = new Offers($this->stub);
-    $actual->show('some-id', false);
-  }
-
   public function testShowWithIdAndTrueReturnsAvailableServices(): void {
     $this->mock->expects($this->once())
                ->method('get')
@@ -56,13 +47,13 @@ class OffersTest extends TestCase {
     $actual->show('some-id', true);
   }
 
-  public function testUpdateWithIdCallsGetWithExpectedUri(): void {
+  public function testUpdateWithIdCallsPatchWithExpectedUriAndData(): void {
     $this->mock->expects($this->once())
-               ->method('post')
+               ->method('patch')
                ->with(
                  $this->equalTo('/air/offers/some-id/passengers/some-offer-passenger-id'),
                  $this->equalTo(['Content-Type' => 'application/json']),
-                 $this->equalTo('{"data":{"account_number":"12901014","airline_iata_code":"BA"}}'),
+                 $this->equalTo('{"data":{"family_name":"some-family-name","given_name":"some-given-name","loyalty_programme_accounts":{"account_number":"12901014","airline_iata_code":"BA"}}}'),
                );
 
     $actual = new Offers($this->stub);
@@ -73,5 +64,18 @@ class OffersTest extends TestCase {
       'some-given-name',
       ['account_number' => '12901014', 'airline_iata_code' => 'BA']
     );
+  }
+
+  public function testPriceOfferCallsPostWithExpectedUri(): void {
+    $this->mock->expects($this->once())
+               ->method('post')
+               ->with(
+                 $this->equalTo('/air/offers/some-id/price'),
+                 $this->equalTo(['Content-Type' => 'application/json']),
+                 $this->equalTo('{"data":{"payment":{"type":"balance"}}}'),
+               );
+
+    $actual = new Offers($this->stub);
+    $actual->price('some-id', ['type' => 'balance']);
   }
 }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Duffel\HttpClient;
 
 use Duffel\Exception\RuntimeException;
-use Duffel\HttpClient\JsonArray;
 use Psr\Http\Message\ResponseInterface;
 
 final class ResponseParser {
@@ -13,17 +12,15 @@ final class ResponseParser {
   public const JSON_CONTENT_TYPE = 'application/json';
 
   /**
-   * @param ResponseInterface $response
-   *
-   * @return mixed|string
+   * Parse HTTP response body. Returns 'data' payload if available, or decoded array, or raw string.
    */
-  public static function getContent(ResponseInterface $response) {
+  public static function getContent(ResponseInterface $response): mixed {
     $body = (string) $response->getBody();
 
-    if (!\in_array($body, ['', 'null', 'true', 'false'], true) && 0 === \strpos($response->getHeaderLine(self::CONTENT_TYPE_HEADER), self::JSON_CONTENT_TYPE)) {
+    if (!\in_array($body, ['', 'null', 'true', 'false'], true) && \str_contains($response->getHeaderLine(self::CONTENT_TYPE_HEADER), self::JSON_CONTENT_TYPE)) {
       $decoded = JsonArray::decode($body);
 
-      if (array_key_exists('data', $decoded)) {
+      if (\is_array($decoded) && \array_key_exists('data', $decoded)) {
         return $decoded['data'];
       }
 
@@ -33,59 +30,62 @@ final class ResponseParser {
     return $body;
   }
 
-  private static function getHeader(ResponseInterface $response, string $name): ?string {
-    $headers = $response->getHeader($name);
+  /**
+   * Parse full response payload including 'data' and 'meta' pagination if present.
+   */
+  public static function getResponsePayload(ResponseInterface $response): mixed {
+    $body = (string) $response->getBody();
 
-    return \array_shift($headers);
+    if (!\in_array($body, ['', 'null', 'true', 'false'], true) && \str_contains($response->getHeaderLine(self::CONTENT_TYPE_HEADER), self::JSON_CONTENT_TYPE)) {
+      return JsonArray::decode($body);
+    }
+
+    return $body;
   }
 
   public static function getErrorMessage(ResponseInterface $response): ?string {
     try {
-      $content = self::getContent($response);
-    } catch (RuntimeException $e) {
+      $payload = self::getResponsePayload($response);
+    } catch (RuntimeException) {
       return null;
     }
 
-    if (!\is_array($content)) {
+    if (!\is_array($payload) || !isset($payload['errors']) || !\is_array($payload['errors'])) {
       return null;
     }
 
-    if (isset($content['errors'])) {
-      $errors = $content['errors'];
+    $errors = $payload['errors'];
+    $requestId = self::getHeader($response, 'x-request-id');
+    $formattedError = self::formatDuffelErrors($errors);
 
-      if (\is_array($errors)) {
-        $requestId = self::getHeader($response, 'x-request-id');
+    if (null !== $requestId && '' !== $requestId) {
+      return \sprintf('[%s]: %s', $requestId, $formattedError);
+    }
 
-        if (\is_null($requestId)) {
-          return self::getMessageAsString($errors);
-        }
+    return $formattedError;
+  }
 
-        return self::wrapWithRequestId(self::getMessageAsString($errors), $requestId);
+  private static function getHeader(ResponseInterface $response, string $name): ?string {
+    $headers = $response->getHeader($name);
+    return !empty($headers) ? $headers[0] : null;
+  }
+
+  private static function formatDuffelErrors(array $errors): string {
+    $formatted = [];
+
+    foreach ($errors as $error) {
+      if (\is_array($error)) {
+        $title = $error['title'] ?? $error['type'] ?? 'Error';
+        $message = $error['message'] ?? '';
+        $code = isset($error['code']) ? \sprintf(' (%s)', $error['code']) : '';
+        $field = isset($error['field']) ? \sprintf(' at field "%s"', $error['field']) : '';
+
+        $formatted[] = \trim(\sprintf('%s%s%s: %s', $title, $code, $field, $message));
+      } else if (\is_string($error)) {
+        $formatted[] = $error;
       }
     }
 
-    return null;
-  }
-
-  private static function wrapWithRequestId(string $message, string $requestId): string {
-    $format = '[%s]: %s';
-
-    return \sprintf($format, $requestId, $message);
-  }
-
-  private static function getMessageAsString(array $message): string {
-    $format = '"%s" %s';
-    $errors = [];
-
-    foreach ($message as $field => $messages) {
-      if (\is_array($messages)) {
-        $messages = \array_unique($messages);
-        foreach ($messages as $error_key => $error_value) {
-          $errors[] = \sprintf('%s: %s', $error_key, $error_value);
-        }
-      }
-    }
-
-    return \implode(', ', $errors);
+    return \implode('; ', $formatted);
   }
 }
