@@ -1,8 +1,29 @@
-# PHPUnit
+# Environment files & secrets
+.env
+.env.*
+!.env.example
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# PHPUnit & Code Coverage
 .phpunit.result.cache
 coverage.txt
 html-coverage/
+.phpstan.cache
 
 # Composer
-composer.lock
 vendor/
