@@ -38,6 +38,7 @@ use Http\Client\Common\Plugin\AddHostPlugin;
 use Http\Client\Common\Plugin\AuthenticationPlugin;
 use Http\Client\Common\Plugin\HeaderDefaultsPlugin;
 use Http\Message\Authentication\Bearer;
+use SensitiveParameter;
 
 class Client {
   private const DEFAULT_API_URL = 'https://api.duffel.com/';
@@ -207,7 +208,7 @@ class Client {
     return $this->accessToken;
   }
 
-  public function setAccessToken(string $token): void {
+  public function setAccessToken(#[SensitiveParameter] string $token): void {
     if ('' === \trim($token)) {
       throw new InvalidAccessTokenException("You need to set a token");
     }

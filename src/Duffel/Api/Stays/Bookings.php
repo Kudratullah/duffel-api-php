@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duffel\Api\Stays;
 
 use Duffel\Api\AbstractApi;
+use SensitiveParameter;
 
 class Bookings extends AbstractApi {
   /**
@@ -33,7 +34,7 @@ class Bookings extends AbstractApi {
    * @param array<string, mixed> $params
    * @return mixed
    */
-  public function create(array $params): mixed {
+  public function create(#[SensitiveParameter] array $params): mixed {
     return $this->post('/stays/bookings', $params);
   }
 
@@ -44,7 +45,7 @@ class Bookings extends AbstractApi {
    * @param array<string, mixed> $params
    * @return mixed
    */
-  public function update(string $id, array $params): mixed {
+  public function update(string $id, #[SensitiveParameter] array $params): mixed {
     return $this->patch('/stays/bookings/' . self::encodePath($id), $params);
   }
 

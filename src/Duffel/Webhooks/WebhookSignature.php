@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Duffel\Webhooks;
 
+use SensitiveParameter;
+
 final class WebhookSignature {
   /**
    * Verify the authenticity of an incoming Duffel webhook payload.
@@ -13,7 +15,7 @@ final class WebhookSignature {
    * @param string $secret Webhook secret key from Duffel dashboard
    * @return bool True if valid, false otherwise
    */
-  public static function verify(string $payload, string $signature, string $secret): bool {
+  public static function verify(string $payload, string $signature, #[SensitiveParameter] string $secret): bool {
     if ('' === \trim($payload) || '' === \trim($signature) || '' === \trim($secret)) {
       return false;
     }

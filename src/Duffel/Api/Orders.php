@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Duffel\Api;
 
+use SensitiveParameter;
+
 class Orders extends AbstractApi {
   /**
    * @param array<string, mixed> $parameters
@@ -25,7 +27,7 @@ class Orders extends AbstractApi {
    * @param array<string, mixed> $params
    * @return mixed
    */
-  public function create(array $params): mixed {
+  public function create(#[SensitiveParameter] array $params): mixed {
     $filteredParams = \array_filter($params, static fn($value) => null !== $value && (!\is_string($value) || '' !== $value));
     return $this->post('/air/orders', $filteredParams);
   }
@@ -45,11 +47,11 @@ class Orders extends AbstractApi {
    * Add a service (extra baggage, seat, etc.) to an existing order.
    *
    * @param string $id
-   * @param array $services
-   * @param array $payment
+   * @param array<mixed> $services
+   * @param array<string, mixed> $payment
    * @return mixed
    */
-  public function addServices(string $id, array $services, array $payment): mixed {
+  public function addServices(string $id, array $services, #[SensitiveParameter] array $payment): mixed {
     return $this->post('/air/orders/' . self::encodePath($id) . '/services', [
       'add_services' => $services,
       'payment' => $payment,
@@ -60,10 +62,10 @@ class Orders extends AbstractApi {
    * Price an order with an intended payment method.
    *
    * @param string $id
-   * @param array $payment
+   * @param array<string, mixed> $payment
    * @return mixed
    */
-  public function price(string $id, array $payment): mixed {
+  public function price(string $id, #[SensitiveParameter] array $payment): mixed {
     return $this->post('/air/orders/' . self::encodePath($id) . '/price', ['payment' => $payment]);
   }
 

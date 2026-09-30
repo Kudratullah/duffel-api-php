@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Duffel\Api;
 
+use SensitiveParameter;
+
 class Offers extends AbstractApi {
   /**
    * @param string $offerRequestId
@@ -32,10 +34,16 @@ class Offers extends AbstractApi {
    * @param string $offer_passenger_id
    * @param string $family_name
    * @param string $given_name
-   * @param array $loyalty_programme_accounts
+   * @param array<string, mixed> $loyalty_programme_accounts
    * @return mixed
    */
-  public function update(string $offer_id, string $offer_passenger_id, string $family_name, string $given_name, array $loyalty_programme_accounts): mixed {
+  public function update(
+    string $offer_id,
+    string $offer_passenger_id,
+    #[SensitiveParameter] string $family_name,
+    #[SensitiveParameter] string $given_name,
+    #[SensitiveParameter] array $loyalty_programme_accounts
+  ): mixed {
     $params = [
       'family_name' => $family_name,
       'given_name' => $given_name,
@@ -51,10 +59,10 @@ class Offers extends AbstractApi {
    * Price an offer with intended payment methods.
    *
    * @param string $offerId
-   * @param array $payment
+   * @param array<string, mixed> $payment
    * @return mixed
    */
-  public function price(string $offerId, array $payment): mixed {
+  public function price(string $offerId, #[SensitiveParameter] array $payment): mixed {
     return $this->post('/air/offers/' . self::encodePath($offerId) . '/price', ['payment' => $payment]);
   }
 
