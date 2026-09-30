@@ -12,8 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **PHP 8.4+ Support**: Bumped minimum required PHP version to `^8.4` with strict typing, constructor property promotion, typed properties, and modern PSR interface implementations.
 - **Duffel API v2**: Default API version header updated from `v1` (sunset in Jan 2025) to `v2`.
-- **Stays (Hotel Accommodation) API**: Full support for searching, rate fetching, quote creation, booking, and accommodation metadata (`$client->stays()`).
+- **Stays (Hotel Accommodation) API**: Full support for searching, rate fetching, quote creation, booking, accommodation metadata, reviews (`AccommodationReviews`), payment instructions (`BookingPaymentInstructions`), and negotiated corporate rates (`NegotiatedRates`).
 - **Cars API**: Full support for car rental searches, quotes, and bookings (`$client->cars()`).
+- **Payments & Cards API**: Added support for saved payment cards (`$client->payments()->cards()`) and 3D Secure session creation (`$client->payments()->threeDSecureSession()`).
 - **Flights API additions**:
   - `AirlineCredits` (`$client->airlineCredits()`)
   - `AirlineInitiatedChanges` (`$client->airlineInitiatedChanges()`)
@@ -25,13 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Customer Users & User Groups (`$client->identity()->users()`, `$client->identity()->userGroups()`)
   - Component Client Keys (`$client->identity()->componentClientKeys()`)
 - **Webhooks & Security**:
+  - `#[\SensitiveParameter]` attributes added across all API access tokens, card details, payment secrets, user info, and order payload parameters.
   - Cryptographically timing-attack safe `WebhookSignature::verify()` helper for HMAC-SHA256 signature verification.
   - Webhook deliveries and events management endpoints (`$client->webhookDeliveries()`, `$client->webhookEvents()`).
   - Access token redaction in `Client::__debugInfo()` (`[REDACTED]`) to prevent credential leaks in stack dumps.
 - **Lazy Cursor Pagination**: Generator-based iteration helper (`$api->iterate()`) for cursor pagination without manual loop boilerplate.
 - **Wire Compression**: Added `Accept-Encoding: gzip, deflate, br` headers.
 - **AI Agent Skill**: Published AI Agent Skill definition in `skills/duffel-travel-api/SKILL.md`.
-- **Examples**: Added `stays-search-and-book.php`, `cursor-pagination.php`, and `webhook-verification.php`.
+- **Examples**: Added runnable examples for stays (`stays-search-and-book.php`), cars (`cars-search-and-book.php`), identity/places (`identity-and-places.php`), cursor pagination (`cursor-pagination.php`), and webhook verification (`webhook-verification.php`).
+- **Quality & Static Analysis**: PHPStan Level 8 clean, zero security advisories (`composer audit`), 100% PHPUnit 12 pass rate (113 tests).
 
 ### Fixed
 - **Query Parameter Serialization Bug**: Fixed `AbstractApi::prepareUri` to append query parameters via `http_build_query()` instead of dropping them.
