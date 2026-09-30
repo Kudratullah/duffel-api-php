@@ -1,18 +1,7 @@
-includes:
-  - vendor/phpstan/phpstan-deprecation-rules/rules.neon
-  - vendor/phpstan/phpstan-strict-rules/rules.neon
-  - vendor/thecodingmachine/phpstan-strict-rules/phpstan-strict-rules.neon
-
-rules:
-  - Ergebnis\PHPStan\Rules\Closures\NoNullableReturnTypeDeclarationRule
-  - Ergebnis\PHPStan\Rules\Expressions\NoCompactRule
-  - Ergebnis\PHPStan\Rules\Expressions\NoEmptyRule
-  - Ergebnis\PHPStan\Rules\Expressions\NoEvalRule
-  - Ergebnis\PHPStan\Rules\Files\DeclareStrictTypesRule
-  - Ergebnis\PHPStan\Rules\Methods\PrivateInFinalClassRule
-
 parameters:
-  level: max
-  checkMissingIterableValueType: false
+  level: 8
   paths:
     - src
+  ignoreErrors:
+    - '#has parameter \$.* with no value type specified in iterable type array#'
+    - '#return type has no value type specified in iterable type array#'

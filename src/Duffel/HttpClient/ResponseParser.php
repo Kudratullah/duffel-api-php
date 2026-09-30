@@ -20,7 +20,7 @@ final class ResponseParser {
     if (!\in_array($body, ['', 'null', 'true', 'false'], true) && \str_contains($response->getHeaderLine(self::CONTENT_TYPE_HEADER), self::JSON_CONTENT_TYPE)) {
       $decoded = JsonArray::decode($body);
 
-      if (\is_array($decoded) && \array_key_exists('data', $decoded)) {
+      if (\array_key_exists('data', $decoded)) {
         return $decoded['data'];
       }
 
@@ -70,15 +70,18 @@ final class ResponseParser {
     return !empty($headers) ? $headers[0] : null;
   }
 
+  /**
+   * @param array<mixed> $errors
+   */
   private static function formatDuffelErrors(array $errors): string {
     $formatted = [];
 
     foreach ($errors as $error) {
       if (\is_array($error)) {
-        $title = $error['title'] ?? $error['type'] ?? 'Error';
-        $message = $error['message'] ?? '';
-        $code = isset($error['code']) ? \sprintf(' (%s)', $error['code']) : '';
-        $field = isset($error['field']) ? \sprintf(' at field "%s"', $error['field']) : '';
+        $title = (string) ($error['title'] ?? $error['type'] ?? 'Error');
+        $message = (string) ($error['message'] ?? '');
+        $code = isset($error['code']) ? \sprintf(' (%s)', (string) $error['code']) : '';
+        $field = isset($error['field']) ? \sprintf(' at field "%s"', (string) $error['field']) : '';
 
         $formatted[] = \trim(\sprintf('%s%s%s: %s', $title, $code, $field, $message));
       } else if (\is_string($error)) {

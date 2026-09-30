@@ -42,7 +42,7 @@ class Offers extends AbstractApi {
       'loyalty_programme_accounts' => $loyalty_programme_accounts,
     ];
 
-    $filteredParams = \array_filter($params, static fn($value) => null !== $value && (!\is_string($value) || '' !== $value));
+    $filteredParams = \array_filter($params, static fn($value) => '' !== $value && [] !== $value);
 
     return $this->patch('/air/offers/' . self::encodePath($offer_id) . '/passengers/' . self::encodePath($offer_passenger_id), $filteredParams);
   }

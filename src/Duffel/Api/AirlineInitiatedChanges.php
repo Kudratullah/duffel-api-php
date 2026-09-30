@@ -15,7 +15,6 @@ class AirlineInitiatedChanges extends AbstractApi {
 
   /**
    * @param string $id
-   * @param string $action 'accept'
    * @return mixed
    */
   public function accept(string $id): mixed {
