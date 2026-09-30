@@ -43,4 +43,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Migrated test runner to **PHPUnit 11** / **PHPUnit 12** with updated schema in `phpunit.xml.dist`.
-- Updated GitHub Actions CI workflows to test on PHP 8.4 and PHP 8.5.
+- Updated GitHub Actions CI workflows: configured `examples.yml` and `static.yml` to run on PHP 8.4, and updated `tests.yml` to run matrix tests across PHP 8.4 and PHP 8.5.
