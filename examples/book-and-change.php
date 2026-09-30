@@ -17,7 +17,7 @@ $departureDate = (new DateTime)->add(new DateInterval("P10D"))->format('Y-m-d');
 $offerRequest = $client->offerRequests()->create(
   "economy", 
   array(
-    array("age" => 25)
+    array("age" => 36)
   ),
   array(
     array(
