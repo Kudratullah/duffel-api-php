@@ -68,7 +68,12 @@ $order = $client->orders()->create(array(
   )
 ));
 
-echo sprintf("Created order %s with booking reference %s\n", $order["id"], $order["booking_reference"]);
+if (!is_array($order) || !isset($order["id"])) {
+  echo "Failed to create order. Response: " . print_r($order, true) . "\n";
+  exit(1);
+}
+
+echo sprintf("Created order %s with booking reference %s\n", $order["id"], $order["booking_reference"] ?? 'N/A');
 
 $orderChangeRequest = $client->orderChangeRequests()->create($order["id"],
   array(

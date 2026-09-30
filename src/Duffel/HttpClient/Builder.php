@@ -48,10 +48,10 @@ final class Builder {
   private $pluginClient;
 
   public function __construct(
-    ClientInterface $httpClient = null,
-    RequestFactoryInterface $requestFactory = null,
-    StreamFactoryInterface $streamFactory = null,
-    UriFactoryInterface $uriFactory = null
+    ?ClientInterface $httpClient = null,
+    ?RequestFactoryInterface $requestFactory = null,
+    ?StreamFactoryInterface $streamFactory = null,
+    ?UriFactoryInterface $uriFactory = null
   ) {
     $this->httpClient = $httpClient ?? Psr18ClientDiscovery::find();
     $this->requestFactory = $requestFactory ?? Psr17FactoryDiscovery::findRequestFactory();

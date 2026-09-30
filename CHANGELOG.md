@@ -39,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Query Parameter Serialization Bug**: Fixed `AbstractApi::prepareUri` to append query parameters via `http_build_query()` instead of dropping them.
 - **Offers Update Bug**: Fixed `Offers::update()` passing `$loyalty_programme_accounts` as request body instead of `$params`, and switched method to `PATCH`.
+- **PHP 8.4 Deprecations**: Fixed implicit nullable parameter declarations (`?Type $param = null`) in `Builder::__construct`.
+- **Example Error Guards**: Added order creation response checks in `examples/book-and-change.php` to prevent TypeError when order creation yields error payloads.
 - **Query Parameter Forwarding**: Updated all resource `all()` methods to forward pagination (`limit`, `after`) and filter parameters.
 
 ### Changed
