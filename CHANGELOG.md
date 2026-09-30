@@ -44,5 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Query Parameter Forwarding**: Updated all resource `all()` methods to forward pagination (`limit`, `after`) and filter parameters.
 
 ### Changed
-- Migrated test runner to **PHPUnit 11** / **PHPUnit 12** with updated schema in `phpunit.xml.dist`.
+- Migrated test runner to **PHPUnit 11** / **PHPUnit 12** with updated schema and `cacheResult="false"` in `phpunit.xml.dist` to resolve result cache file permissions warnings.
+- Refactored `ResponseParserTest` with dedicated mocks per test method to eliminate double-stubbing notices.
 - Updated GitHub Actions CI workflows: upgraded `actions/cache` to `v4` (replacing deprecated `v2`), updated step outputs to `$GITHUB_OUTPUT`, added `develop` branch triggers, configured `examples.yml` and `static.yml` for PHP 8.4, and set up `tests.yml` for PHP 8.4 and 8.5 matrix testing.

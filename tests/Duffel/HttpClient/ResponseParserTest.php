@@ -4,19 +4,12 @@ declare(strict_types=1);
 
 namespace Duffel\Tests\HttpClient;
 
-use Duffel\Exception\RuntimeException;
 use Duffel\HttpClient\ResponseParser;
 use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
 class ResponseParserTest extends TestCase {
-  private $stub;
-
-  public function setUp(): void {
-    $this->stub = $this->createStub(ResponseInterface::class);
-  }
-
   public function testConstantContainsExpectedContentTypeHeader(): void {
     $this->assertSame('Content-Type', ResponseParser::CONTENT_TYPE_HEADER);
   }
@@ -26,158 +19,170 @@ class ResponseParserTest extends TestCase {
   }
 
   public function testGetContentAsJsonWithoutDataKey(): void {
-    $this->stub->method('getBody')
-               ->willReturn(Utils::streamFor('{"some": {"keys": ["with", "values"]} }'));
-    $this->stub->method('getHeaderLine')
-               ->with('Content-Type')
-               ->willReturn('application/json');
+    $stub = $this->createMock(ResponseInterface::class);
+    $stub->method('getBody')
+         ->willReturn(Utils::streamFor('{"some": {"keys": ["with", "values"]} }'));
+    $stub->method('getHeaderLine')
+         ->with('Content-Type')
+         ->willReturn('application/json');
 
-    $this->assertSame(["some" => ["keys" => ["with", "values"]]], ResponseParser::getContent($this->stub));
+    $this->assertSame(["some" => ["keys" => ["with", "values"]]], ResponseParser::getContent($stub));
   }
 
   public function testGetContentAsJsonWithDataKey(): void {
-    $this->stub->method('getBody')
-               ->willReturn(Utils::streamFor('{"data": {"some": {"keys": ["with", "values"]} } }'));
-    $this->stub->method('getHeaderLine')
-               ->with('Content-Type')
-               ->willReturn('application/json');
+    $stub = $this->createMock(ResponseInterface::class);
+    $stub->method('getBody')
+         ->willReturn(Utils::streamFor('{"data": {"some": {"keys": ["with", "values"]} } }'));
+    $stub->method('getHeaderLine')
+         ->with('Content-Type')
+         ->willReturn('application/json');
 
-    $this->assertSame(["some" => ["keys" => ["with", "values"]]], ResponseParser::getContent($this->stub));
+    $this->assertSame(["some" => ["keys" => ["with", "values"]]], ResponseParser::getContent($stub));
   }
 
   public function testGetContentWithNilBodyAndContentTypeAsJson(): void {
-    $this->stub->method('getBody')
-               ->willReturn(Utils::streamFor(''));
-    $this->stub->method('getHeaderLine')
-               ->with('Content-Type')
-               ->willReturn('application/json');
+    $stub = $this->createMock(ResponseInterface::class);
+    $stub->method('getBody')
+         ->willReturn(Utils::streamFor(''));
+    $stub->method('getHeaderLine')
+         ->with('Content-Type')
+         ->willReturn('application/json');
 
-    $this->assertSame('', ResponseParser::getContent($this->stub));
+    $this->assertSame('', ResponseParser::getContent($stub));
   }
 
   public function testGetContentWithNullBodyAndContentTypeAsJson(): void {
-    $this->stub->method('getBody')
-               ->willReturn(Utils::streamFor('null'));
-    $this->stub->method('getHeaderLine')
-               ->with('Content-Type')
-               ->willReturn('application/json');
+    $stub = $this->createMock(ResponseInterface::class);
+    $stub->method('getBody')
+         ->willReturn(Utils::streamFor('null'));
+    $stub->method('getHeaderLine')
+         ->with('Content-Type')
+         ->willReturn('application/json');
 
-    $this->assertSame('null', ResponseParser::getContent($this->stub));
+    $this->assertSame('null', ResponseParser::getContent($stub));
   }
 
   public function testGetContentWithTrueBodyAndContentTypeAsJson(): void {
-    $this->stub->method('getBody')
-               ->willReturn(Utils::streamFor('true'));
-    $this->stub->method('getHeaderLine')
-               ->with('Content-Type')
-               ->willReturn('application/json');
+    $stub = $this->createMock(ResponseInterface::class);
+    $stub->method('getBody')
+         ->willReturn(Utils::streamFor('true'));
+    $stub->method('getHeaderLine')
+         ->with('Content-Type')
+         ->willReturn('application/json');
 
-    $this->assertSame('true', ResponseParser::getContent($this->stub));
+    $this->assertSame('true', ResponseParser::getContent($stub));
   }
 
   public function testGetContentWithFalseBodyAndContentTypeAsJson(): void {
-    $this->stub->method('getBody')
-               ->willReturn(Utils::streamFor('false'));
-    $this->stub->method('getHeaderLine')
-               ->with('Content-Type')
-               ->willReturn('application/json');
+    $stub = $this->createMock(ResponseInterface::class);
+    $stub->method('getBody')
+         ->willReturn(Utils::streamFor('false'));
+    $stub->method('getHeaderLine')
+         ->with('Content-Type')
+         ->willReturn('application/json');
 
-    $this->assertSame('false', ResponseParser::getContent($this->stub));
+    $this->assertSame('false', ResponseParser::getContent($stub));
   }
 
   public function testGetErrorMessageTransformsList(): void {
-    $this->stub->method('getBody')
-               ->willReturn(Utils::streamFor('{
-               "errors": [
-                 {
-                   "code": "missing_authorization_header",
-                   "documentation_url": "https://duffel.com/docs/api/overview/errors",
-                   "message": "The \'Authorization\' header needs to be set and contain a valid API token.",
-                   "title": "Missing authorization header",
-                   "type": "authentication_error"
-                 }
-               ],
-               "meta": {
-                 "request_id": "FZW0H3HdJwKk5HMAAKxB",
-                 "status": 401
-               }
-             }'));
-    $this->stub->method('getHeaderLine')
-               ->with('Content-Type')
-               ->willReturn('application/json');
-    $this->stub->method('getHeader')
-               ->with('x-request-id')
-               ->willReturn(['some-request-id']);
+    $stub = $this->createMock(ResponseInterface::class);
+    $stub->method('getBody')
+         ->willReturn(Utils::streamFor('{
+         "errors": [
+           {
+             "code": "missing_authorization_header",
+             "documentation_url": "https://duffel.com/docs/api/overview/errors",
+             "message": "The \'Authorization\' header needs to be set and contain a valid API token.",
+             "title": "Missing authorization header",
+             "type": "authentication_error"
+           }
+         ],
+         "meta": {
+           "request_id": "FZW0H3HdJwKk5HMAAKxB",
+           "status": 401
+         }
+       }'));
+    $stub->method('getHeaderLine')
+         ->with('Content-Type')
+         ->willReturn('application/json');
+    $stub->method('getHeader')
+         ->with('x-request-id')
+         ->willReturn(['some-request-id']);
 
     $this->assertSame(
       '[some-request-id]: Missing authorization header (missing_authorization_header): The \'Authorization\' header needs to be set and contain a valid API token.',
-      ResponseParser::getErrorMessage($this->stub)
+      ResponseParser::getErrorMessage($stub)
     );
   }
 
   public function testGetErrorMessageWhenRequestIdIsMissingReturnsUnwrappedMessage(): void {
-    $this->stub->method('getBody')
-               ->willReturn(Utils::streamFor('{
-               "errors": [
-                 {
-                   "code": "missing_authorization_header",
-                   "documentation_url": "https://duffel.com/docs/api/overview/errors",
-                   "message": "The \'Authorization\' header needs to be set and contain a valid API token.",
-                   "title": "Missing authorization header",
-                   "type": "authentication_error"
-                 }
-               ]
-             }'));
-    $this->stub->method('getHeaderLine')
-               ->with('Content-Type')
-               ->willReturn('application/json');
-    $this->stub->method('getHeader')
-               ->with('x-request-id')
-               ->willReturn([]);
+    $stub = $this->createMock(ResponseInterface::class);
+    $stub->method('getBody')
+         ->willReturn(Utils::streamFor('{
+         "errors": [
+           {
+             "code": "missing_authorization_header",
+             "documentation_url": "https://duffel.com/docs/api/overview/errors",
+             "message": "The \'Authorization\' header needs to be set and contain a valid API token.",
+             "title": "Missing authorization header",
+             "type": "authentication_error"
+           }
+         ]
+       }'));
+    $stub->method('getHeaderLine')
+         ->with('Content-Type')
+         ->willReturn('application/json');
+    $stub->method('getHeader')
+         ->with('x-request-id')
+         ->willReturn([]);
 
     $this->assertSame(
       'Missing authorization header (missing_authorization_header): The \'Authorization\' header needs to be set and contain a valid API token.',
-      ResponseParser::getErrorMessage($this->stub)
+      ResponseParser::getErrorMessage($stub)
     );
   }
 
   public function testGetErrorMessageWhenJsonDecodeFailsReturnsNull(): void {
-    $this->stub->method('getBody')
-               ->willThrowException(new RuntimeException('Invalid body stream'));
-    $this->stub->method('getHeaderLine')
-               ->with('Content-Type')
-               ->willReturn('application/json');
+    $stub = $this->createMock(ResponseInterface::class);
+    $stub->method('getBody')
+         ->willReturn(Utils::streamFor('invalid json'));
+    $stub->method('getHeaderLine')
+         ->with('Content-Type')
+         ->willReturn('application/json');
 
-    $this->assertSame(null, ResponseParser::getErrorMessage($this->stub));
+    $this->assertNull(ResponseParser::getErrorMessage($stub));
   }
 
   public function testGetErrorMessageWhenJsonIsStringReturnsNull(): void {
-    $this->stub->method('getBody')
-               ->willReturn(Utils::streamFor('"some error string in JSON format"'));
-    $this->stub->method('getHeaderLine')
-               ->with('Content-Type')
-               ->willReturn('application/json');
+    $stub = $this->createMock(ResponseInterface::class);
+    $stub->method('getBody')
+         ->willReturn(Utils::streamFor('"hello"'));
+    $stub->method('getHeaderLine')
+         ->with('Content-Type')
+         ->willReturn('application/json');
 
-    $this->assertSame(null, ResponseParser::getErrorMessage($this->stub));
+    $this->assertNull(ResponseParser::getErrorMessage($stub));
   }
 
   public function testGetErrorMessageWhenTextIsStringReturnsNull(): void {
-    $this->stub->method('getBody')
-               ->willReturn(Utils::streamFor('some error string in text format'));
-    $this->stub->method('getHeaderLine')
-               ->with('Content-Type')
-               ->willReturn('text/plain');
+    $stub = $this->createMock(ResponseInterface::class);
+    $stub->method('getBody')
+         ->willReturn(Utils::streamFor('plain text'));
+    $stub->method('getHeaderLine')
+         ->with('Content-Type')
+         ->willReturn('text/plain');
 
-    $this->assertSame(null, ResponseParser::getErrorMessage($this->stub));
+    $this->assertNull(ResponseParser::getErrorMessage($stub));
   }
 
   public function testGetErrorMessageWhenJsonIsObjectWithoutErrorsKeyReturnsNull(): void {
-    $this->stub->method('getBody')
-               ->willReturn(Utils::streamFor('{"some": ["error", "string in JSON", "format"]}'));
-    $this->stub->method('getHeaderLine')
-               ->with('Content-Type')
-               ->willReturn('application/json');
+    $stub = $this->createMock(ResponseInterface::class);
+    $stub->method('getBody')
+         ->willReturn(Utils::streamFor('{"foo": "bar"}'));
+    $stub->method('getHeaderLine')
+         ->with('Content-Type')
+         ->willReturn('application/json');
 
-    $this->assertSame(null, ResponseParser::getErrorMessage($this->stub));
+    $this->assertNull(ResponseParser::getErrorMessage($stub));
   }
 }

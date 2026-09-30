@@ -5,6 +5,7 @@
          colors="true"
          processIsolation="false"
          stopOnFailure="false"
+         cacheResult="false"
          testdox="true"
          bootstrap="vendor/autoload.php">
   <testsuites>

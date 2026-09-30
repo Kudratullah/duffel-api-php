@@ -33,21 +33,24 @@ class OfferRequestsTest extends TestCase {
   public function testCreateWithoutParametersRaisesException(): void {
     $this->expectException(RuntimeException::class);
 
-    $actual = new OfferRequests($this->stub);
+    $stub = $this->createStub(Client::class);
+    $actual = new OfferRequests($stub);
     $actual->create();
   }
 
   public function testCreateWithCabinClassParameterRaisesException(): void {
     $this->expectException(RuntimeException::class);
 
-    $actual = new OfferRequests($this->stub);
+    $stub = $this->createStub(Client::class);
+    $actual = new OfferRequests($stub);
     $actual->create('business');
   }
 
   public function testCreateWithEconomyCabinClassAndPassengersRaisesException(): void {
     $this->expectException(RuntimeException::class);
 
-    $actual = new OfferRequests($this->stub);
+    $stub = $this->createStub(Client::class);
+    $actual = new OfferRequests($stub);
     $actual->create('economy', [['given_name' => 'Amelia', 'family_name' => 'Earhart', 'age' => 30]]);
   }
 
