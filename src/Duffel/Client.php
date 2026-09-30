@@ -24,6 +24,8 @@ use Duffel\Api\Orders;
 use Duffel\Api\PartialOfferRequests;
 use Duffel\Api\PaymentIntents;
 use Duffel\Api\Payments;
+use Duffel\Api\Payments\Cards;
+use Duffel\Api\Payments\ThreeDSecureSession;
 use Duffel\Api\Places;
 use Duffel\Api\Refunds;
 use Duffel\Api\SeatMaps;
@@ -63,6 +65,8 @@ class Client {
   private ?Orders $orders = null;
   private ?PaymentIntents $paymentIntents = null;
   private ?Payments $payments = null;
+  private ?Cards $cards = null;
+  private ?ThreeDSecureSession $threeDSecureSession = null;
   private ?Refunds $refunds = null;
   private ?SeatMaps $seatMaps = null;
   private ?Webhooks $webhooks = null;
@@ -142,6 +146,14 @@ class Client {
 
   public function payments(): Payments {
     return $this->payments ??= new Payments($this);
+  }
+
+  public function cards(): Cards {
+    return $this->cards ??= new Cards($this);
+  }
+
+  public function threeDSecureSession(): ThreeDSecureSession {
+    return $this->threeDSecureSession ??= new ThreeDSecureSession($this);
   }
 
   public function refunds(): Refunds {

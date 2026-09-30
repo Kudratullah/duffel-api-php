@@ -1,11 +1,11 @@
 ---
 name: duffel-travel-api
-description: Search, book, and manage flights, stays (hotels), and cars using the Duffel API PHP SDK (v2). Use when implementing or debugging flight searches, hotel bookings, seat selection, extra baggage, order cancellations, or webhook verifications.
+description: Search, book, and manage flights, stays (hotels), cars, payments, identity, and places using the Duffel API PHP SDK (v2). Use when implementing or debugging flight searches, hotel bookings, car rentals, seat selection, extra baggage, order cancellations, 3DS payment verification, or webhook verifications.
 ---
 
 # Duffel Travel API (PHP SDK v2) Skill
 
-This skill guides AI agents on how to use the `duffel/api` PHP SDK (`Duffel\Client`) to perform travel searches, bookings, and operations across Flights, Stays, Cars, and Places.
+This skill guides AI agents on how to use the `duffel/api` PHP SDK (`Duffel\Client`) to perform travel searches, bookings, and operations across Flights, Stays, Cars, Payments, Identity, and Places.
 
 ## Key Capabilities & Requirements
 - **PHP Version**: 8.4+
@@ -152,7 +152,51 @@ $booking = $client->stays()->bookings()->create([
 
 ---
 
-## 4. Cursor Pagination Helper
+## 4. Cars Rental Workflows
+
+```php
+// 1. Search Rental Cars
+$carSearch = $client->cars()->searches()->create([
+    'pickup_location' => ['iata_code' => 'LHR'],
+    'dropoff_location' => ['iata_code' => 'LHR'],
+    'pickup_datetime' => '2026-11-20T10:00:00Z',
+    'dropoff_datetime' => '2026-11-25T10:00:00Z',
+    'driver_age' => 30,
+]);
+
+// 2. Create Quote & Book Car
+$quote = $client->cars()->quotes()->create(['search_result_id' => $carSearch['results'][0]['id']]);
+$booking = $client->cars()->bookings()->create(['quote_id' => $quote['id']]);
+```
+
+---
+
+## 5. Payments (Card Tokenization & 3DS)
+
+```php
+// Create card token
+$card = $client->cards()->create(['token' => 'tok_12345']);
+
+// 3D Secure session
+$threeDS = $client->threeDSecureSession()->create(['resource_id' => 'ord_123']);
+```
+
+---
+
+## 6. Places & Identity Management
+
+```php
+// Place suggestions
+$places = $client->places()->suggestions('Paris');
+
+// Identity - Customer Users & Groups
+$userGroups = $client->identity()->userGroups()->all();
+$users = $client->identity()->users()->all();
+```
+
+---
+
+## 7. Cursor Pagination Helper
 
 Use lazy generators for iterating through full lists (airports, airlines, orders) without manual page loops:
 
@@ -164,7 +208,7 @@ foreach ($client->airports()->iterate('/air/airports', ['limit' => 100]) as $air
 
 ---
 
-## 5. Secure Webhook Verification
+## 8. Secure Webhook Verification
 
 ```php
 use Duffel\Webhooks\WebhookSignature;
@@ -183,4 +227,5 @@ if (!WebhookSignature::verify($payload, $signature, $secret)) {
 
 ## Error Handling & Troubleshooting
 - All API errors thrown by `Duffel\HttpClient\JsonArray` or HTTP errors return parsed Duffel error messages with `[x-request-id]: ErrorType (code): message`.
-- Test mode tokens (`duffel_test_...`) interact with Duffel sandbox. Use `duffel-airways` for test bookings.
+- Sensitive parameters (API tokens, secrets, payment data, PII) are marked with `#[SensitiveParameter]` to prevent stack trace leakage.
+- Test mode tokens (`duffel_test_...`) interact with Duffel sandbox. Use `duffel-airways` for test flight bookings.

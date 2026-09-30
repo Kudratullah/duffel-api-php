@@ -8,6 +8,28 @@ use SensitiveParameter;
 
 class Payments extends AbstractApi {
   /**
+   * List payments.
+   *
+   * @param array<string, mixed> $parameters
+   * @return mixed
+   */
+  public function all(array $parameters = []): mixed {
+    return $this->get('/air/payments', $parameters);
+  }
+
+  /**
+   * Get single payment.
+   *
+   * @param string $id
+   * @return mixed
+   */
+  public function show(string $id): mixed {
+    return $this->get('/air/payments/' . self::encodePath($id));
+  }
+
+  /**
+   * Create a payment.
+   *
    * @param string $orderId
    * @param array<string, mixed> $payment
    * @return mixed

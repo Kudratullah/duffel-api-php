@@ -6,10 +6,13 @@ namespace Duffel\Api;
 
 use Duffel\Client;
 use Duffel\Api\Stays\Accommodation;
+use Duffel\Api\Stays\AccommodationReviews;
+use Duffel\Api\Stays\BookingPaymentInstructions;
 use Duffel\Api\Stays\Bookings;
 use Duffel\Api\Stays\Brands;
 use Duffel\Api\Stays\Chains;
 use Duffel\Api\Stays\LoyaltyProgrammes;
+use Duffel\Api\Stays\NegotiatedRates;
 use Duffel\Api\Stays\Quotes;
 use Duffel\Api\Stays\Searches;
 
@@ -18,9 +21,12 @@ class Stays {
   private ?Quotes $quotes = null;
   private ?Bookings $bookings = null;
   private ?Accommodation $accommodation = null;
+  private ?AccommodationReviews $accommodationReviews = null;
+  private ?BookingPaymentInstructions $bookingPaymentInstructions = null;
   private ?Brands $brands = null;
   private ?Chains $chains = null;
   private ?LoyaltyProgrammes $loyaltyProgrammes = null;
+  private ?NegotiatedRates $negotiatedRates = null;
 
   public function __construct(private Client $client) {}
 
@@ -40,6 +46,14 @@ class Stays {
     return $this->accommodation ??= new Accommodation($this->client);
   }
 
+  public function accommodationReviews(): AccommodationReviews {
+    return $this->accommodationReviews ??= new AccommodationReviews($this->client);
+  }
+
+  public function bookingPaymentInstructions(): BookingPaymentInstructions {
+    return $this->bookingPaymentInstructions ??= new BookingPaymentInstructions($this->client);
+  }
+
   public function brands(): Brands {
     return $this->brands ??= new Brands($this->client);
   }
@@ -50,5 +64,9 @@ class Stays {
 
   public function loyaltyProgrammes(): LoyaltyProgrammes {
     return $this->loyaltyProgrammes ??= new LoyaltyProgrammes($this->client);
+  }
+
+  public function negotiatedRates(): NegotiatedRates {
+    return $this->negotiatedRates ??= new NegotiatedRates($this->client);
   }
 }
